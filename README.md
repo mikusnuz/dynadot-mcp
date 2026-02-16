@@ -6,7 +6,7 @@ MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) d
 
 ## Features
 
-- **35+ tools** covering the full Dynadot API3
+- **60 tools** covering the full Dynadot API3 (~106 commands)
 - Domain search, registration, renewal, deletion
 - DNS record management (A, AAAA, CNAME, MX, TXT, SRV)
 - Nameserver configuration and DNSSEC
@@ -87,6 +87,8 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `list_domains` | List all domains in account |
 | `renew_domain` | Renew a domain |
 | `delete_domain` | Delete a domain (grace period) |
+| `restore_domain` | Restore a deleted domain (redemption period) |
+| `push_domain` | Push domain to another Dynadot account |
 
 ### DNS
 | Tool | Description |
@@ -98,6 +100,10 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `register_nameserver` | Register a custom nameserver |
 | `get_dnssec` | Get DNSSEC settings |
 | `set_dnssec` | Set or clear DNSSEC |
+| `add_nameserver` | Add a new nameserver entry |
+| `set_nameserver_ip` | Update a nameserver's IP address |
+| `delete_nameserver` | Delete a nameserver (by host or domain) |
+| `list_registered_nameservers` | List all registered nameservers |
 
 ### Contacts
 | Tool | Description |
@@ -106,6 +112,9 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `edit_contact` | Edit an existing contact |
 | `delete_contact` | Delete a contact |
 | `list_contacts` | List all contacts or get details |
+| `set_contact_regional_setting` | Set EU/LV/LT regional contact settings |
+| `manage_cn_audit` | Create or check .cn domain audit |
+| `set_reseller_verification` | Set reseller WHOIS verification status |
 
 ### Transfers
 | Tool | Description |
@@ -115,6 +124,8 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `get_transfer_status` | Check transfer status |
 | `get_auth_code` | Get transfer auth/EPP code |
 | `authorize_transfer_away` | Approve outgoing transfer |
+| `set_auth_code` | Set transfer authorization code |
+| `manage_domain_push` | View/accept/reject domain push requests |
 
 ### Settings
 | Tool | Description |
@@ -125,6 +136,10 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `set_renew_option` | Set auto-renewal option |
 | `lock_domain` | Lock domain for transfer protection |
 | `set_domain_note` | Set domain note and folder |
+| `set_parking` | Enable domain parking |
+| `set_hosting` | Set Dynadot hosting (basic/advanced) |
+| `set_email_forward` | Set email forwarding or MX records |
+| `clear_domain_setting` | Clear a specific domain service setting |
 
 ### Folders
 | Tool | Description |
@@ -133,6 +148,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `delete_folder` | Delete a folder |
 | `list_folders` | List all folders |
 | `set_folder_settings` | Apply default settings to folder |
+| `rename_folder` | Rename a folder |
 
 ### Account
 | Tool | Description |
@@ -140,6 +156,11 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `get_account_info` | Get account information |
 | `get_account_balance` | Check account balance |
 | `set_account_defaults` | Set default account settings |
+| `list_orders` | List order history |
+| `get_order_status` | Check order status by ID |
+| `check_processing` | Check for pending operations |
+| `list_coupons` | List available coupons |
+| `get_tld_price` | Get TLD pricing info |
 
 ### Marketplace
 | Tool | Description |
@@ -149,6 +170,11 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `manage_backorders` | Add/delete/list backorder requests |
 | `set_for_sale` | List a domain for sale |
 | `get_marketplace_listings` | View marketplace listings |
+| `get_auction_details` | Get auction details and bid history |
+| `manage_backorder_auctions` | View/bid on backorder auctions |
+| `buy_expired_domain` | Browse/buy expired closeout domains |
+| `buy_it_now` | Purchase a marketplace listing |
+| `confirm_marketplace_action` | Confirm Afternic/Sedo actions |
 
 ## Resources
 

@@ -271,4 +271,65 @@ export function registerDomainTools(
       }
     }
   );
+
+  // ─── restore_domain ───────────────────────────────────────────
+
+  server.tool(
+    "restore_domain",
+    "Restore a recently deleted domain from the redemption grace period.",
+    {
+      domain: z.string().describe("Domain name to restore"),
+    },
+    async ({ domain }) => {
+      try {
+        const result = await client.restoreDomain(domain);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Domain restore failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── push_domain ──────────────────────────────────────────────
+
+  server.tool(
+    "push_domain",
+    "Push (transfer) a domain to another Dynadot account by username.",
+    {
+      domain: z.string().describe("Domain name to push"),
+      receiver: z.string().describe("Recipient's Dynadot push username"),
+      unlock: z
+        .boolean()
+        .optional()
+        .describe("Unlock the domain before pushing (if locked)"),
+    },
+    async ({ domain, receiver, unlock }) => {
+      try {
+        const result = await client.pushDomain(domain, receiver, unlock);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Domain push failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

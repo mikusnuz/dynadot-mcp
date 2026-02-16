@@ -171,4 +171,110 @@ export function registerContactTools(
       }
     }
   );
+
+  // ─── set_contact_regional_setting ─────────────────────────────
+
+  server.tool(
+    "set_contact_regional_setting",
+    "Set region-specific contact settings required by certain TLD registries " +
+      "(EU, Latvia, Lithuania). Pass the appropriate parameters for the region.",
+    {
+      contact_id: z.string().describe("Contact ID to configure"),
+      region: z
+        .enum(["eu", "lv", "lt"])
+        .describe("Region: 'eu' (European Union), 'lv' (Latvia), 'lt' (Lithuania)"),
+      params: z
+        .record(z.string())
+        .describe("Region-specific parameters as key-value pairs"),
+    },
+    async ({ contact_id, region, params }) => {
+      try {
+        const command = `set_contact_${region}_setting`;
+        const result = await client.setContactRegionalSetting(command, contact_id, params);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set regional setting: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── manage_cn_audit ──────────────────────────────────────────
+
+  server.tool(
+    "manage_cn_audit",
+    "Manage China (.cn) domain audit requests. Required for .cn domain registration. " +
+      "Create a new audit or check the status of an existing one.",
+    {
+      action: z
+        .enum(["create", "status"])
+        .describe("Action: 'create' a new audit or check 'status'"),
+      contact_id: z.string().describe("Contact ID for the audit"),
+      params: z
+        .record(z.string())
+        .optional()
+        .describe("Audit parameters (required for 'create': audit documents, etc.)"),
+    },
+    async ({ action, contact_id, params }) => {
+      try {
+        let result;
+        if (action === "create") {
+          result = await client.createCnAudit(contact_id, params || {});
+        } else {
+          result = await client.getCnAuditStatus(contact_id);
+        }
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `CN audit operation failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── set_reseller_verification ────────────────────────────────
+
+  server.tool(
+    "set_reseller_verification",
+    "Set the WHOIS verification status for a reseller contact.",
+    {
+      contact_id: z.string().describe("Contact ID"),
+      status: z.string().describe("Verification status to set"),
+    },
+    async ({ contact_id, status }) => {
+      try {
+        const result = await client.setResellerContactWhoisVerificationStatus(contact_id, status);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set verification status: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

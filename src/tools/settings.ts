@@ -252,4 +252,139 @@ export function registerSettingsTools(
       }
     }
   );
+
+  // ─── set_parking ──────────────────────────────────────────────
+
+  server.tool(
+    "set_parking",
+    "Enable domain parking for a domain. Parked domains show a placeholder page.",
+    {
+      domain: z.string().describe("Domain name to park"),
+      with_ads: z
+        .boolean()
+        .optional()
+        .describe("Show ads on the parking page"),
+    },
+    async ({ domain, with_ads }) => {
+      try {
+        const result = await client.setParking(domain, with_ads);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set parking: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── set_hosting ──────────────────────────────────────────────
+
+  server.tool(
+    "set_hosting",
+    "Set website hosting for a domain using Dynadot's built-in hosting service.",
+    {
+      domain: z.string().describe("Domain name to configure hosting for"),
+      hosting_type: z
+        .enum(["advanced", "basic"])
+        .describe("Hosting type: 'advanced' or 'basic'"),
+      mobile_view: z
+        .boolean()
+        .optional()
+        .describe("Enable mobile-optimized view (advanced hosting only)"),
+    },
+    async ({ domain, hosting_type, mobile_view }) => {
+      try {
+        const result = await client.setHosting(domain, hosting_type, mobile_view);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set hosting: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── set_email_forward ────────────────────────────────────────
+
+  server.tool(
+    "set_email_forward",
+    "Set email forwarding for a domain. Forward emails to existing email " +
+      "addresses or configure MX records.",
+    {
+      domain: z.string().describe("Domain name to configure email forwarding for"),
+      params: z
+        .record(z.string())
+        .describe(
+          "Email forwarding parameters. Keys: forward_type ('forward'/'mx'), " +
+            "username0/exist_email0 (for forward type), " +
+            "mx_host0/mx_priority0 (for mx type)"
+        ),
+    },
+    async ({ domain, params }) => {
+      try {
+        const result = await client.setEmailForward(domain, params);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set email forwarding: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── clear_domain_setting ─────────────────────────────────────
+
+  server.tool(
+    "clear_domain_setting",
+    "Clear a specific service setting from a domain (e.g., forwarding, parking, " +
+      "hosting, DNS, email forwarding).",
+    {
+      domain: z.string().describe("Domain name to clear settings for"),
+      service: z
+        .enum(["forwarding", "stealth", "parking", "hosting", "dns", "email_forward"])
+        .describe("Service to clear"),
+    },
+    async ({ domain, service }) => {
+      try {
+        const result = await client.clearDomainSetting(domain, service);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to clear setting: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

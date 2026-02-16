@@ -146,4 +146,33 @@ export function registerFolderTools(
       }
     }
   );
+
+  // ─── rename_folder ────────────────────────────────────────────
+
+  server.tool(
+    "rename_folder",
+    "Rename an existing folder.",
+    {
+      folder_id: z.string().describe("Folder ID to rename"),
+      folder_name: z.string().describe("New name for the folder"),
+    },
+    async ({ folder_id, folder_name }) => {
+      try {
+        const result = await client.renameFolder(folder_id, folder_name);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to rename folder: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

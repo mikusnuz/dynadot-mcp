@@ -6,7 +6,7 @@
 
 ## 기능
 
-- Dynadot API3 전체를 커버하는 **35개 이상의 도구**
+- Dynadot API3 전체를 커버하는 **60개의 도구** (~106개 명령)
 - 도메인 검색, 등록, 갱신, 삭제
 - DNS 레코드 관리 (A, AAAA, CNAME, MX, TXT, SRV)
 - 네임서버 구성 및 DNSSEC
@@ -87,6 +87,8 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `list_domains` | 계정의 모든 도메인 목록 조회 |
 | `renew_domain` | 도메인 갱신 |
 | `delete_domain` | 도메인 삭제 (유예 기간) |
+| `restore_domain` | 삭제된 도메인 복원 (상환 기간) |
+| `push_domain` | 도메인을 다른 Dynadot 계정으로 푸시 |
 
 ### DNS
 | 도구 | 설명 |

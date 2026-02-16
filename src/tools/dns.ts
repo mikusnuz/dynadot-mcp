@@ -261,4 +261,136 @@ export function registerDnsTools(
       }
     }
   );
+
+  // ─── add_nameserver ───────────────────────────────────────────
+
+  server.tool(
+    "add_nameserver",
+    "Add (create) a new nameserver entry with a hostname and IP address.",
+    {
+      host: z.string().describe("Nameserver hostname (e.g., 'ns1.example.com')"),
+      ip: z.string().describe("IP address for the nameserver"),
+    },
+    async ({ host, ip }) => {
+      try {
+        const result = await client.addNameserver(host, ip);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to add nameserver: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── set_nameserver_ip ────────────────────────────────────────
+
+  server.tool(
+    "set_nameserver_ip",
+    "Update the IP address of an existing registered nameserver.",
+    {
+      host: z.string().describe("Nameserver hostname to update"),
+      ip: z.string().describe("New IP address"),
+    },
+    async ({ host, ip }) => {
+      try {
+        const result = await client.setNameserverIp(host, ip);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to update nameserver IP: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── delete_nameserver ────────────────────────────────────────
+
+  server.tool(
+    "delete_nameserver",
+    "Delete a registered nameserver by hostname, or delete all nameservers " +
+      "associated with a domain.",
+    {
+      host: z
+        .string()
+        .optional()
+        .describe("Nameserver hostname to delete"),
+      domain: z
+        .string()
+        .optional()
+        .describe("Delete all nameservers for this domain instead"),
+    },
+    async ({ host, domain }) => {
+      try {
+        let result;
+        if (domain) {
+          result = await client.deleteNameserverByDomain(domain);
+        } else if (host) {
+          result = await client.deleteNameserver(host);
+        } else {
+          return {
+            content: [
+              { type: "text" as const, text: "Either host or domain is required" },
+            ],
+            isError: true,
+          };
+        }
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to delete nameserver: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── list_registered_nameservers ──────────────────────────────
+
+  server.tool(
+    "list_registered_nameservers",
+    "List all registered (custom) nameservers in the account.",
+    {},
+    async () => {
+      try {
+        const result = await client.listRegisteredNameservers();
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to list nameservers: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

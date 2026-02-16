@@ -167,4 +167,83 @@ export function registerTransferTools(
       }
     }
   );
+
+  // ─── set_auth_code ────────────────────────────────────────────
+
+  server.tool(
+    "set_auth_code",
+    "Set the transfer authorization (EPP) code for a domain.",
+    {
+      domain: z.string().describe("Domain name"),
+      auth_code: z.string().describe("Authorization/EPP code to set"),
+    },
+    async ({ domain, auth_code }) => {
+      try {
+        const result = await client.setTransferAuthCode(domain, auth_code);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to set auth code: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── manage_domain_push ───────────────────────────────────────
+
+  server.tool(
+    "manage_domain_push",
+    "View or respond to incoming domain push requests from other Dynadot accounts.",
+    {
+      action: z
+        .enum(["list", "accept", "reject"])
+        .describe("Action: 'list' pending requests, 'accept' or 'reject' a request"),
+      push_id: z
+        .string()
+        .optional()
+        .describe("Push request ID (required for 'accept'/'reject')"),
+    },
+    async ({ action, push_id }) => {
+      try {
+        if (action === "list") {
+          const result = await client.getDomainPushRequest();
+          return {
+            content: [
+              { type: "text" as const, text: JSON.stringify(result, null, 2) },
+            ],
+          };
+        }
+        if (!push_id) {
+          return {
+            content: [
+              { type: "text" as const, text: "push_id is required for accept/reject" },
+            ],
+            isError: true,
+          };
+        }
+        const result = await client.setDomainPushRequest(push_id, action);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Domain push operation failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

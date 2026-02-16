@@ -110,4 +110,156 @@ export function registerAccountTools(
       }
     }
   );
+
+  // ─── list_orders ──────────────────────────────────────────────
+
+  server.tool(
+    "list_orders",
+    "List all orders (purchases, renewals, transfers) in the account history.",
+    {},
+    async () => {
+      try {
+        const result = await client.listOrders();
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to list orders: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── get_order_status ─────────────────────────────────────────
+
+  server.tool(
+    "get_order_status",
+    "Check the status of a specific order by ID.",
+    {
+      order_id: z.string().describe("Order ID to check"),
+    },
+    async ({ order_id }) => {
+      try {
+        const result = await client.getOrderStatus(order_id);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to get order status: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── check_processing ─────────────────────────────────────────
+
+  server.tool(
+    "check_processing",
+    "Check if there are any pending/processing operations on the account.",
+    {},
+    async () => {
+      try {
+        const result = await client.isProcessing();
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to check processing: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── list_coupons ─────────────────────────────────────────────
+
+  server.tool(
+    "list_coupons",
+    "List all available coupon codes on the account.",
+    {},
+    async () => {
+      try {
+        const result = await client.listCoupons();
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to list coupons: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── get_tld_price ────────────────────────────────────────────
+
+  server.tool(
+    "get_tld_price",
+    "Get pricing information for TLDs (top-level domains). Returns registration, " +
+      "renewal, and transfer prices.",
+    {
+      currency: z
+        .string()
+        .optional()
+        .describe("Currency for pricing (e.g., 'USD', 'EUR')"),
+      count_per_page: z
+        .number()
+        .int()
+        .optional()
+        .describe("Number of results per page"),
+      page_index: z
+        .number()
+        .int()
+        .optional()
+        .describe("Page index (0-based)"),
+    },
+    async ({ currency, count_per_page, page_index }) => {
+      try {
+        const result = await client.getTldPrice({
+          currency,
+          countPerPage: count_per_page,
+          pageIndex: page_index,
+        });
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to get TLD prices: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

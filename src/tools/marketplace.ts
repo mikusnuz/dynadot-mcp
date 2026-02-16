@@ -223,4 +223,249 @@ export function registerMarketplaceTools(
       }
     }
   );
+
+  // ─── get_auction_details ──────────────────────────────────────
+
+  server.tool(
+    "get_auction_details",
+    "Get detailed information about a specific auction, including current " +
+      "bids and auction status.",
+    {
+      auction_id: z.string().describe("Auction ID to get details for"),
+      include_bids: z
+        .boolean()
+        .optional()
+        .describe("Also fetch bid history for this auction"),
+    },
+    async ({ auction_id, include_bids }) => {
+      try {
+        const details = await client.getAuctionDetails(auction_id);
+        if (include_bids) {
+          const bids = await client.getAuctionBids(auction_id);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify({ details, bids }, null, 2),
+              },
+            ],
+          };
+        }
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(details, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Failed to get auction details: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── manage_backorder_auctions ────────────────────────────────
+
+  server.tool(
+    "manage_backorder_auctions",
+    "View backorder auctions (open or closed) or get details/place a bid " +
+      "on a specific backorder auction.",
+    {
+      action: z
+        .enum(["list_open", "list_closed", "details", "bid"])
+        .describe(
+          "Action: 'list_open', 'list_closed', 'details' (get info), or 'bid' (place bid)"
+        ),
+      auction_id: z
+        .string()
+        .optional()
+        .describe("Auction ID (required for 'details' and 'bid')"),
+      amount: z
+        .string()
+        .optional()
+        .describe("Bid amount (required for 'bid')"),
+      currency: z
+        .string()
+        .optional()
+        .describe("Currency for the bid"),
+    },
+    async ({ action, auction_id, amount, currency }) => {
+      try {
+        let result;
+        switch (action) {
+          case "list_open":
+            result = await client.getOpenBackorderAuctions();
+            break;
+          case "list_closed":
+            result = await client.getClosedBackorderAuctions();
+            break;
+          case "details":
+            if (!auction_id) {
+              return {
+                content: [
+                  { type: "text" as const, text: "auction_id is required for 'details'" },
+                ],
+                isError: true,
+              };
+            }
+            result = await client.getBackorderAuctionDetails(auction_id);
+            break;
+          case "bid":
+            if (!auction_id || !amount) {
+              return {
+                content: [
+                  { type: "text" as const, text: "auction_id and amount are required for 'bid'" },
+                ],
+                isError: true,
+              };
+            }
+            result = await client.placeBackorderAuctionBid(auction_id, amount, currency);
+            break;
+        }
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Backorder auction operation failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── buy_expired_domain ───────────────────────────────────────
+
+  server.tool(
+    "buy_expired_domain",
+    "Browse and purchase expired closeout domains at discounted prices. " +
+      "Use action 'list' to see available domains or 'buy' to purchase one.",
+    {
+      action: z
+        .enum(["list", "buy"])
+        .describe("Action: 'list' available expired domains or 'buy' one"),
+      domain: z
+        .string()
+        .optional()
+        .describe("Domain name to buy (required for 'buy')"),
+      currency: z
+        .string()
+        .optional()
+        .describe("Currency for the purchase"),
+      params: z
+        .record(z.string())
+        .optional()
+        .describe("Additional filter parameters for 'list'"),
+    },
+    async ({ action, domain, currency, params }) => {
+      try {
+        if (action === "list") {
+          const result = await client.getExpiredCloseoutDomains(params);
+          return {
+            content: [
+              { type: "text" as const, text: JSON.stringify(result, null, 2) },
+            ],
+          };
+        }
+        if (!domain) {
+          return {
+            content: [
+              { type: "text" as const, text: "domain is required for 'buy'" },
+            ],
+            isError: true,
+          };
+        }
+        const result = await client.buyExpiredCloseoutDomain(domain, currency);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Expired domain operation failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── buy_it_now ───────────────────────────────────────────────
+
+  server.tool(
+    "buy_it_now",
+    "Purchase a domain listed on the marketplace at its Buy It Now price.",
+    {
+      listing_id: z.string().describe("Listing ID to purchase"),
+      currency: z
+        .string()
+        .optional()
+        .describe("Currency for the purchase"),
+    },
+    async ({ listing_id, currency }) => {
+      try {
+        const result = await client.buyItNow(listing_id, currency);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Buy It Now failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── confirm_marketplace_action ───────────────────────────────
+
+  server.tool(
+    "confirm_marketplace_action",
+    "Confirm or reject a marketplace action from Afternic or Sedo integration.",
+    {
+      platform: z
+        .enum(["afternic", "sedo"])
+        .describe("Marketplace platform: 'afternic' or 'sedo'"),
+      domain: z.string().describe("Domain name"),
+      action: z.string().describe("Action to confirm (e.g., 'accept', 'reject')"),
+    },
+    async ({ platform, domain, action }) => {
+      try {
+        const result =
+          platform === "afternic"
+            ? await client.setAfternicConfirmAction(domain, action)
+            : await client.setSedoConfirmAction(domain, action);
+        return {
+          content: [
+            { type: "text" as const, text: JSON.stringify(result, null, 2) },
+          ],
+        };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            { type: "text" as const, text: `Marketplace confirmation failed: ${msg}` },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 }

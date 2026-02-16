@@ -153,6 +153,16 @@ export class DynadotClient {
     return this.call("delete", { domain });
   }
 
+  async restoreDomain(domain: string): Promise<DynadotResponse> {
+    return this.call("restore", { domain });
+  }
+
+  async pushDomain(domain: string, receiver: string, unlockForPush?: boolean): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain, receiver_push_username: receiver };
+    if (unlockForPush) params.unlock_domain_for_push = "1";
+    return this.call("push", params);
+  }
+
   // ─── DNS ─────────────────────────────────────────────────────────
 
   async getDns(domain: string): Promise<DynadotResponse> {
@@ -191,6 +201,26 @@ export class DynadotClient {
     return this.call("clear_dnssec", { domain });
   }
 
+  async addNameserver(host: string, ip: string): Promise<DynadotResponse> {
+    return this.call("add_ns", { host, ip });
+  }
+
+  async setNameserverIp(host: string, ip: string): Promise<DynadotResponse> {
+    return this.call("set_ns_ip", { host, ip });
+  }
+
+  async deleteNameserver(host: string): Promise<DynadotResponse> {
+    return this.call("delete_ns", { host });
+  }
+
+  async deleteNameserverByDomain(domain: string): Promise<DynadotResponse> {
+    return this.call("delete_ns_by_domain", { domain });
+  }
+
+  async listRegisteredNameservers(): Promise<DynadotResponse> {
+    return this.call("server_list");
+  }
+
   // ─── Contact ─────────────────────────────────────────────────────
 
   async createContact(fields: Record<string, string>): Promise<DynadotResponse> {
@@ -211,6 +241,18 @@ export class DynadotClient {
 
   async getContact(contactId: string): Promise<DynadotResponse> {
     return this.call("get_contact", { contact_id: contactId });
+  }
+
+  async setContactRegionalSetting(command: string, contactId: string, params: Record<string, string>): Promise<DynadotResponse> {
+    return this.call(command, { contact_id: contactId, ...params });
+  }
+
+  async createCnAudit(contactId: string, params: Record<string, string>): Promise<DynadotResponse> {
+    return this.call("create_cn_audit", { contact_id: contactId, ...params });
+  }
+
+  async getCnAuditStatus(contactId: string): Promise<DynadotResponse> {
+    return this.call("get_cn_audit_status", { contact_id: contactId });
   }
 
   // ─── Transfer ────────────────────────────────────────────────────
@@ -239,6 +281,18 @@ export class DynadotClient {
 
   async authorizeTransferAway(domain: string): Promise<DynadotResponse> {
     return this.call("authorize_transfer_away", { domain });
+  }
+
+  async setTransferAuthCode(domain: string, authCode: string): Promise<DynadotResponse> {
+    return this.call("set_transfer_auth_code", { domain, auth: authCode });
+  }
+
+  async getDomainPushRequest(): Promise<DynadotResponse> {
+    return this.call("get_domain_push_request");
+  }
+
+  async setDomainPushRequest(pushId: string, action: string): Promise<DynadotResponse> {
+    return this.call("set_domain_push_request", { push_id: pushId, action });
   }
 
   // ─── Settings ────────────────────────────────────────────────────
@@ -279,6 +333,26 @@ export class DynadotClient {
     return this.call("set_folder", { domain, folder });
   }
 
+  async setParking(domain: string, withAds?: boolean): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain };
+    if (withAds !== undefined) params.with_ads = withAds ? "1" : "0";
+    return this.call("set_parking", params);
+  }
+
+  async setHosting(domain: string, hostingType: string, mobileViewOn?: boolean): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain, hosting_type: hostingType };
+    if (mobileViewOn !== undefined) params.mobile_view_on = mobileViewOn ? "1" : "0";
+    return this.call("set_hosting", params);
+  }
+
+  async setEmailForward(domain: string, emailParams: Record<string, string>): Promise<DynadotResponse> {
+    return this.call("set_email_forward", { domain, ...emailParams });
+  }
+
+  async clearDomainSetting(domain: string, service: string): Promise<DynadotResponse> {
+    return this.call("set_clear_domain_setting", { domain, service });
+  }
+
   // ─── Folder ──────────────────────────────────────────────────────
 
   async createFolder(folderName: string): Promise<DynadotResponse> {
@@ -293,6 +367,10 @@ export class DynadotClient {
     return this.call("folder_list");
   }
 
+  async renameFolder(folderId: string, folderName: string): Promise<DynadotResponse> {
+    return this.call("set_folder_name", { folder_id: folderId, folder_name: folderName });
+  }
+
   // ─── Account ─────────────────────────────────────────────────────
 
   async getAccountInfo(): Promise<DynadotResponse> {
@@ -301,6 +379,22 @@ export class DynadotClient {
 
   async getAccountBalance(): Promise<DynadotResponse> {
     return this.call("get_account_balance");
+  }
+
+  async listOrders(): Promise<DynadotResponse> {
+    return this.call("order_list");
+  }
+
+  async getOrderStatus(orderId: string): Promise<DynadotResponse> {
+    return this.call("get_order_status", { order_id: orderId });
+  }
+
+  async isProcessing(): Promise<DynadotResponse> {
+    return this.call("is_processing");
+  }
+
+  async listCoupons(): Promise<DynadotResponse> {
+    return this.call("list_coupons");
   }
 
   // ─── Marketplace ─────────────────────────────────────────────────
@@ -349,6 +443,54 @@ export class DynadotClient {
     const params: Record<string, string> = { listing_id: listingId };
     if (currency) params.currency = currency;
     return this.call("buy_it_now", params);
+  }
+
+  async getAuctionDetails(auctionId: string): Promise<DynadotResponse> {
+    return this.call("get_auction_details", { auction_id: auctionId });
+  }
+
+  async getAuctionBids(auctionId: string): Promise<DynadotResponse> {
+    return this.call("get_auction_bids", { auction_id: auctionId });
+  }
+
+  async getOpenBackorderAuctions(): Promise<DynadotResponse> {
+    return this.call("get_open_backorder_auctions");
+  }
+
+  async getClosedBackorderAuctions(): Promise<DynadotResponse> {
+    return this.call("get_closed_backorder_auctions");
+  }
+
+  async getBackorderAuctionDetails(auctionId: string): Promise<DynadotResponse> {
+    return this.call("get_backorder_auction_details", { auction_id: auctionId });
+  }
+
+  async placeBackorderAuctionBid(auctionId: string, amount: string, currency?: string): Promise<DynadotResponse> {
+    const params: Record<string, string> = { auction_id: auctionId, bid_amount: amount };
+    if (currency) params.currency = currency;
+    return this.call("place_backorder_auction_bid", params);
+  }
+
+  async getExpiredCloseoutDomains(options?: Record<string, string>): Promise<DynadotResponse> {
+    return this.call("get_expired_closeout_domains", options);
+  }
+
+  async buyExpiredCloseoutDomain(domain: string, currency?: string): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain };
+    if (currency) params.currency = currency;
+    return this.call("buy_expired_closeout_domain", params);
+  }
+
+  async setAfternicConfirmAction(domain: string, action: string): Promise<DynadotResponse> {
+    return this.call("set_afternic_confirm_action", { domain, action });
+  }
+
+  async setSedoConfirmAction(domain: string, action: string): Promise<DynadotResponse> {
+    return this.call("set_sedo_confirm_action", { domain, action });
+  }
+
+  async setResellerContactWhoisVerificationStatus(contactId: string, status: string): Promise<DynadotResponse> {
+    return this.call("set_reseller_contact_whois_verification_status", { contact_id: contactId, status });
   }
 
   async getTldPrice(options?: {
