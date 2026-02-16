@@ -1,3 +1,5 @@
+**English** | [한국어](README.ko.md)
+
 # dynadot-mcp
 
 MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) domain registrar API. Manage domains, DNS records, contacts, transfers, and more — all from your AI assistant.
