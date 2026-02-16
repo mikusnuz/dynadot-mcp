@@ -100,6 +100,10 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `register_nameserver` | 커스텀 네임서버 등록 |
 | `get_dnssec` | DNSSEC 설정 조회 |
 | `set_dnssec` | DNSSEC 설정 또는 해제 |
+| `add_nameserver` | 새 네임서버 항목 추가 |
+| `set_nameserver_ip` | 네임서버의 IP 주소 업데이트 |
+| `delete_nameserver` | 네임서버 삭제 (호스트 또는 도메인별) |
+| `list_registered_nameservers` | 등록된 모든 네임서버 목록 조회 |
 
 ### 연락처
 | 도구 | 설명 |
@@ -108,6 +112,9 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `edit_contact` | 기존 연락처 수정 |
 | `delete_contact` | 연락처 삭제 |
 | `list_contacts` | 모든 연락처 목록 조회 또는 상세 정보 확인 |
+| `set_contact_regional_setting` | EU/LV/LT 지역별 연락처 설정 |
+| `manage_cn_audit` | .cn 도메인 감사 생성 또는 확인 |
+| `set_reseller_verification` | 리셀러 WHOIS 검증 상태 설정 |
 
 ### 이전
 | 도구 | 설명 |
@@ -117,6 +124,8 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `get_transfer_status` | 이전 상태 확인 |
 | `get_auth_code` | 이전 인증/EPP 코드 조회 |
 | `authorize_transfer_away` | 아웃고잉 이전 승인 |
+| `set_auth_code` | 이전 인증 코드 설정 |
+| `manage_domain_push` | 도메인 푸시 요청 조회/수락/거부 |
 
 ### 설정
 | 도구 | 설명 |
@@ -127,6 +136,10 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `set_renew_option` | 자동 갱신 옵션 설정 |
 | `lock_domain` | 이전 보호를 위한 도메인 잠금 |
 | `set_domain_note` | 도메인 메모 및 폴더 설정 |
+| `set_parking` | 도메인 파킹 활성화 |
+| `set_hosting` | Dynadot 호스팅 설정 (basic/advanced) |
+| `set_email_forward` | 이메일 포워딩 또는 MX 레코드 설정 |
+| `clear_domain_setting` | 특정 도메인 서비스 설정 초기화 |
 
 ### 폴더
 | 도구 | 설명 |
@@ -135,6 +148,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `delete_folder` | 폴더 삭제 |
 | `list_folders` | 모든 폴더 목록 조회 |
 | `set_folder_settings` | 폴더에 기본 설정 적용 |
+| `rename_folder` | 폴더 이름 변경 |
 
 ### 계정
 | 도구 | 설명 |
@@ -142,6 +156,11 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `get_account_info` | 계정 정보 조회 |
 | `get_account_balance` | 계정 잔액 확인 |
 | `set_account_defaults` | 기본 계정 설정 지정 |
+| `list_orders` | 주문 내역 조회 |
+| `get_order_status` | ID로 주문 상태 확인 |
+| `check_processing` | 대기 중인 작업 확인 |
+| `list_coupons` | 사용 가능한 쿠폰 목록 조회 |
+| `get_tld_price` | TLD 가격 정보 조회 |
 
 ### 마켓플레이스
 | 도구 | 설명 |
@@ -151,6 +170,11 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `manage_backorders` | 백오더 요청 추가/삭제/목록 조회 |
 | `set_for_sale` | 판매용 도메인 리스팅 |
 | `get_marketplace_listings` | 마켓플레이스 리스팅 조회 |
+| `get_auction_details` | 경매 상세 정보 및 입찰 기록 조회 |
+| `manage_backorder_auctions` | 백오더 경매 조회/입찰 |
+| `buy_expired_domain` | 만료된 클로즈아웃 도메인 탐색/구매 |
+| `buy_it_now` | 마켓플레이스 리스팅 즉시 구매 |
+| `confirm_marketplace_action` | Afternic/Sedo 액션 확인 |
 
 ## 리소스
 
