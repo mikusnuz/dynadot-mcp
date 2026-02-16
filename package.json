@@ -1,0 +1,51 @@
+{
+  "name": "dynadot-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for the Dynadot domain registrar API — manage domains, DNS, contacts, transfers, and more",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "dynadot-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "dynadot",
+    "domain",
+    "dns",
+    "registrar",
+    "model-context-protocol"
+  ],
+  "author": "plumbug",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikusnuz/dynadot-mcp.git"
+  },
+  "homepage": "https://github.com/mikusnuz/dynadot-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/mikusnuz/dynadot-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
