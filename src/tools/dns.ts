@@ -61,10 +61,12 @@ export function registerDnsTools(
       records: z
         .record(z.string())
         .describe(
-          "DNS record parameters as key-value pairs. Keys follow Dynadot API naming: " +
-            "main_record_type (a/aaaa/cname/forward/txt/mx/stealth), main_record (value), " +
-            "subdomain0 (name), sub_record_type0 (type), sub_record0 (value), " +
-            "mx_host0/mx_priority0, ttl (optional, default 300)"
+          "DNS record parameters as key-value pairs. Keys follow Dynadot API3 set_dns2 naming: " +
+            "main_record_type0..19 (a/aaaa/cname/forward/txt/mx/stealth/email), " +
+            "main_record0..19 (value), main_recordx0..19 (MX distance/forward type/stealth title/email alias), " +
+            "subdomain0..9 (name), sub_record_type0..9 (type), sub_record0..9 (value), " +
+            "sub_recordx0..9 (MX distance etc), ttl (optional, default 300), " +
+            "add_dns_to_current_setting (optional, set to '1' to append instead of overwrite)"
         ),
     },
     async ({ domain, records }) => {
