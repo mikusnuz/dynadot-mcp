@@ -27,6 +27,13 @@ export class DynadotClient {
    * All parameters are passed as query string params.
    */
   async call(command: string, params?: Record<string, string>): Promise<DynadotResponse> {
+    if (!this.apiKey) {
+      throw new Error(
+        "DYNADOT_API_KEY environment variable is required. " +
+          "Get your API key from https://www.dynadot.com/account/domain/setting/api.html"
+      );
+    }
+
     const url = new URL(this.baseUrl);
     url.searchParams.set("key", this.apiKey);
     url.searchParams.set("command", command);
