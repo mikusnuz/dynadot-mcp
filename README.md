@@ -2,6 +2,8 @@
 
 # dynadot-mcp
 
+[![MCP Badge](https://lobehub.com/badge/mcp/mikusnuz-dynadot-mcp)](https://lobehub.com/mcp/mikusnuz-dynadot-mcp)
+
 MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) domain registrar API. Manage domains, DNS records, contacts, transfers, and more — all from your AI assistant.
 
 ## Features
