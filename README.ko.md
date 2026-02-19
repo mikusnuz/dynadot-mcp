@@ -2,6 +2,7 @@
 
 # dynadot-mcp
 
+[![npm version](https://img.shields.io/npm/v/dynadot-mcp)](https://www.npmjs.com/package/dynadot-mcp)
 [![MCP Badge](https://lobehub.com/badge/mcp/mikusnuz-dynadot-mcp)](https://lobehub.com/mcp/mikusnuz-dynadot-mcp)
 
 [Dynadot](https://www.dynadot.com) 도메인 등록대행업체 API를 위한 MCP (Model Context Protocol) 서버입니다. AI 어시스턴트에서 도메인, DNS 레코드, 연락처, 이전 등을 관리할 수 있습니다.
