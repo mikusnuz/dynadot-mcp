@@ -73,18 +73,41 @@ export class DynadotClient {
       );
     }
 
-    const json = await response.json() as DynadotResponse;
+    let json: DynadotResponse;
+    try {
+      json = await response.json() as DynadotResponse;
+    } catch {
+      throw new Error(
+        `Dynadot API returned invalid JSON for command: ${command}`
+      );
+    }
 
     // Check for error in response — Dynadot uses various response wrappers
     // but they all have a Status field or ResponseCode
     const responseKey = Object.keys(json).find((k) => k.endsWith("Response"));
     if (responseKey) {
       const inner = json[responseKey] as Record<string, unknown>;
-      if (inner?.ResponseCode === -1 || inner?.Status === "error") {
-        throw new Error(
-          `Dynadot API error: ${inner.Error || inner.Message || JSON.stringify(inner)}`
-        );
+      if (
+        inner?.ResponseCode === -1 ||
+        inner?.ResponseCode === "-1" ||
+        inner?.Status === "error" ||
+        inner?.Status === "Error"
+      ) {
+        const errorMsg =
+          inner.Error || inner.ErrorMessage || inner.Message || JSON.stringify(inner);
+        throw new Error(`Dynadot API error: ${errorMsg}`);
       }
+    }
+
+    // Also check top-level error fields (some commands return errors at top level)
+    if (
+      (json as Record<string, unknown>).error ||
+      (json as Record<string, unknown>).Error
+    ) {
+      const errorMsg =
+        (json as Record<string, unknown>).error ||
+        (json as Record<string, unknown>).Error;
+      throw new Error(`Dynadot API error: ${errorMsg}`);
     }
 
     return json;
@@ -282,8 +305,14 @@ export class DynadotClient {
     return this.call("get_transfer_status", { domain });
   }
 
-  async getTransferAuthCode(domain: string): Promise<DynadotResponse> {
-    return this.call("get_transfer_auth_code", { domain });
+  async getTransferAuthCode(domain: string, options?: {
+    newCode?: boolean;
+    unlockForTransfer?: boolean;
+  }): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain };
+    if (options?.newCode) params.new_code = "1";
+    if (options?.unlockForTransfer) params.unlock_domain_for_transfer = "1";
+    return this.call("get_transfer_auth_code", params);
   }
 
   async authorizeTransferAway(domain: string): Promise<DynadotResponse> {
@@ -328,8 +357,10 @@ export class DynadotClient {
     return this.call("set_renew_option", { domain, renew_option: option });
   }
 
-  async lockDomain(domain: string): Promise<DynadotResponse> {
-    return this.call("lock_domain", { domain });
+  async lockDomain(domain: string, lock?: string): Promise<DynadotResponse> {
+    const params: Record<string, string> = { domain };
+    if (lock !== undefined) params.lock = lock;
+    return this.call("lock_domain", params);
   }
 
   async setNote(domain: string, note: string): Promise<DynadotResponse> {

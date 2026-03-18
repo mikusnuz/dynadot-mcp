@@ -83,7 +83,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 ### 도메인 관리
 | 도구 | 설명 |
 |------|------|
-| `search_domain` | 도메인 사용 가능 여부 확인 (최대 100개 동시 조회) |
+| `search_domain` | 도메인 사용 가능 여부 확인 (최대 100개, 가격 및 언어 옵션 포함) |
 | `register_domain` | 새 도메인 등록 |
 | `bulk_register_domains` | 여러 도메인 한 번에 등록 |
 | `get_domain_info` | 도메인 상세 정보 조회 |
@@ -125,7 +125,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `transfer_domain` | 도메인 이전 시작 |
 | `cancel_transfer` | 대기 중인 이전 취소 |
 | `get_transfer_status` | 이전 상태 확인 |
-| `get_auth_code` | 이전 인증/EPP 코드 조회 |
+| `get_auth_code` | 이전 인증/EPP 코드 조회 (잠금 해제 및 코드 재생성 옵션) |
 | `authorize_transfer_away` | 아웃고잉 이전 승인 |
 | `set_auth_code` | 이전 인증 코드 설정 |
 | `manage_domain_push` | 도메인 푸시 요청 조회/수락/거부 |
@@ -137,7 +137,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `set_whois_contacts` | WHOIS 연락처 설정 |
 | `set_forwarding` | URL/스텔스 포워딩 설정 |
 | `set_renew_option` | 자동 갱신 옵션 설정 |
-| `lock_domain` | 이전 보호를 위한 도메인 잠금 |
+| `lock_domain` | 이전 보호를 위한 도메인 잠금/잠금 해제 |
 | `set_domain_note` | 도메인 메모 및 폴더 설정 |
 | `set_parking` | 도메인 파킹 활성화 |
 | `set_hosting` | Dynadot 호스팅 설정 (basic/advanced) |
@@ -150,7 +150,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `create_folder` | 새 폴더 생성 |
 | `delete_folder` | 폴더 삭제 |
 | `list_folders` | 모든 폴더 목록 조회 |
-| `set_folder_settings` | 폴더에 기본 설정 적용 |
+| `set_folder_settings` | 폴더에 기본 설정 적용 (WHOIS, NS, DNS, 포워딩 등) |
 | `rename_folder` | 폴더 이름 변경 |
 
 ### 계정

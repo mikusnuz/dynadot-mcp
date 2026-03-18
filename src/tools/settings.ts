@@ -185,14 +185,18 @@ export function registerSettingsTools(
 
   server.tool(
     "lock_domain",
-    "Lock a domain to prevent unauthorized transfers. This enables the " +
-      "registrar lock (clientTransferProhibited).",
+    "Lock or unlock a domain for transfer protection. Locking enables " +
+      "clientTransferProhibited status to prevent unauthorized transfers.",
     {
-      domain: z.string().describe("Domain name to lock"),
+      domain: z.string().describe("Domain name to lock/unlock"),
+      lock: z
+        .enum(["lock", "unlock"])
+        .optional()
+        .describe("Action: 'lock' to enable transfer lock, 'unlock' to disable it (default: 'lock')"),
     },
-    async ({ domain }) => {
+    async ({ domain, lock }) => {
       try {
-        const result = await client.lockDomain(domain);
+        const result = await client.lockDomain(domain, lock);
         return {
           content: [
             { type: "text" as const, text: JSON.stringify(result, null, 2) },
@@ -202,7 +206,7 @@ export function registerSettingsTools(
         const msg = error instanceof Error ? error.message : String(error);
         return {
           content: [
-            { type: "text" as const, text: `Failed to lock domain: ${msg}` },
+            { type: "text" as const, text: `Failed to lock/unlock domain: ${msg}` },
           ],
           isError: true,
         };

@@ -83,7 +83,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ### Domain Management
 | Tool | Description |
 |------|-------------|
-| `search_domain` | Check domain availability (up to 100 at once) |
+| `search_domain` | Check domain availability (up to 100 at once, with pricing and language options) |
 | `register_domain` | Register a new domain |
 | `bulk_register_domains` | Register multiple domains at once |
 | `get_domain_info` | Get detailed domain information |
@@ -125,7 +125,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `transfer_domain` | Initiate a domain transfer |
 | `cancel_transfer` | Cancel a pending transfer |
 | `get_transfer_status` | Check transfer status |
-| `get_auth_code` | Get transfer auth/EPP code |
+| `get_auth_code` | Get transfer auth/EPP code (with optional unlock and code regeneration) |
 | `authorize_transfer_away` | Approve outgoing transfer |
 | `set_auth_code` | Set transfer authorization code |
 | `manage_domain_push` | View/accept/reject domain push requests |
@@ -137,7 +137,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `set_whois_contacts` | Set WHOIS contacts |
 | `set_forwarding` | Set URL/stealth forwarding |
 | `set_renew_option` | Set auto-renewal option |
-| `lock_domain` | Lock domain for transfer protection |
+| `lock_domain` | Lock or unlock domain for transfer protection |
 | `set_domain_note` | Set domain note and folder |
 | `set_parking` | Enable domain parking |
 | `set_hosting` | Set Dynadot hosting (basic/advanced) |
@@ -150,7 +150,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `create_folder` | Create a new folder |
 | `delete_folder` | Delete a folder |
 | `list_folders` | List all folders |
-| `set_folder_settings` | Apply default settings to folder |
+| `set_folder_settings` | Apply default settings to folder (WHOIS, NS, DNS, forwarding, etc.) |
 | `rename_folder` | Rename a folder |
 
 ### Account

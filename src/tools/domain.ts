@@ -39,12 +39,17 @@ export function registerDomainTools(
         .string()
         .optional()
         .describe("Currency for pricing (e.g., 'USD', 'EUR')"),
+      language: z
+        .string()
+        .optional()
+        .describe("Language for results (e.g., 'en', 'zh', 'es')"),
     },
-    async ({ domains, show_price, currency }) => {
+    async ({ domains, show_price, currency, language }) => {
       try {
         const result = await client.search(domains, {
           showPrice: show_price,
           currency,
+          language,
         });
         return {
           content: [

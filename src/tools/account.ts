@@ -76,10 +76,10 @@ export function registerAccountTools(
       "stealth, hosting, email forwarding, and renewal options.",
     {
       setting_type: z
-        .enum(["whois", "ns", "dns2", "parking", "forwarding", "stealth", "hosting", "email_forward", "renew_option", "clear"])
+        .enum(["whois", "ns", "dns", "dns2", "parking", "forwarding", "stealth", "hosting", "email_forward", "renew_option", "clear"])
         .describe(
-          "Type of default setting: 'whois', 'ns', 'dns2', 'parking', " +
-            "'forwarding', 'stealth', 'hosting', 'email_forward', " +
+          "Type of default setting: 'whois', 'ns', 'dns' (basic DNS), 'dns2' (advanced DNS), " +
+            "'parking', 'forwarding', 'stealth', 'hosting', 'email_forward', " +
             "'renew_option', or 'clear' (remove defaults)"
         ),
       params: z

@@ -109,11 +109,11 @@ export function registerFolderTools(
     {
       folder_id: z.string().describe("Folder ID to configure"),
       setting_type: z
-        .enum(["ns", "dns2", "forwarding", "stealth", "parking", "hosting", "email_forward", "renew_option", "clear"])
+        .enum(["whois", "ns", "dns", "dns2", "forwarding", "stealth", "parking", "hosting", "email_forward", "renew_option", "clear"])
         .describe(
-          "Type of setting to apply: 'ns' (nameservers), 'dns2' (DNS records), " +
-            "'forwarding', 'stealth', 'parking', 'hosting', 'email_forward', " +
-            "'renew_option', or 'clear' (remove settings)"
+          "Type of setting to apply: 'whois' (WHOIS contacts), 'ns' (nameservers), " +
+            "'dns' (basic DNS), 'dns2' (advanced DNS records), 'forwarding', 'stealth', " +
+            "'parking', 'hosting', 'email_forward', 'renew_option', or 'clear' (remove settings)"
         ),
       params: z
         .record(z.string())

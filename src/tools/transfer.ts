@@ -116,13 +116,25 @@ export function registerTransferTools(
   server.tool(
     "get_auth_code",
     "Get the transfer authorization (EPP) code for a domain. This code is " +
-      "needed to transfer the domain to another registrar.",
+      "needed to transfer the domain to another registrar. Can optionally " +
+      "generate a new code and unlock the domain for transfer.",
     {
       domain: z.string().describe("Domain name to get the auth code for"),
+      new_code: z
+        .boolean()
+        .optional()
+        .describe("Generate a new authorization code instead of returning the existing one"),
+      unlock_for_transfer: z
+        .boolean()
+        .optional()
+        .describe("Automatically unlock the domain for transfer when retrieving the code"),
     },
-    async ({ domain }) => {
+    async ({ domain, new_code, unlock_for_transfer }) => {
       try {
-        const result = await client.getTransferAuthCode(domain);
+        const result = await client.getTransferAuthCode(domain, {
+          newCode: new_code,
+          unlockForTransfer: unlock_for_transfer,
+        });
         return {
           content: [
             { type: "text" as const, text: JSON.stringify(result, null, 2) },
