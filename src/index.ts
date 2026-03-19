@@ -175,3 +175,74 @@ main().catch((error) => {
   console.error("[dynadot-mcp] Fatal error:", error);
   process.exit(1);
 });
+
+// ── Smithery Sandbox ──
+
+export function createSandboxServer() {
+  const mockClient = new DynadotClient("", true);
+
+  const sandbox = new McpServer(
+    {
+      name: "dynadot-mcp",
+      version: "1.3.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+        resources: {},
+        prompts: {},
+      },
+    }
+  );
+
+  registerDomainTools(sandbox, mockClient);
+  registerDnsTools(sandbox, mockClient);
+  registerContactTools(sandbox, mockClient);
+  registerTransferTools(sandbox, mockClient);
+  registerSettingsTools(sandbox, mockClient);
+  registerFolderTools(sandbox, mockClient);
+  registerAccountTools(sandbox, mockClient);
+  registerMarketplaceTools(sandbox, mockClient);
+  registerAccountResource(sandbox, mockClient);
+  registerDomainsResource(sandbox, mockClient);
+
+  sandbox.prompt(
+    "domain_audit",
+    "Audit all domains in the account.",
+    {
+      urgent_days: z.string().optional().describe("Flag domains expiring within this many days as urgent (default: 30)"),
+    },
+    ({ urgent_days }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text: `Run a comprehensive audit of all domains. Urgency threshold: ${urgent_days ?? "30"} days.`,
+          },
+        },
+      ],
+    })
+  );
+
+  sandbox.prompt(
+    "transfer_domain",
+    "Guide through the full domain transfer-in process.",
+    {
+      domain: z.string().describe("The domain name to transfer in"),
+    },
+    ({ domain }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text: `Transfer the domain "${domain}" into my Dynadot account.`,
+          },
+        },
+      ],
+    })
+  );
+
+  return sandbox;
+}
