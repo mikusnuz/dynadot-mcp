@@ -1,0 +1,18 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - dynadotApiKey
+    properties:
+      dynadotApiKey:
+        type: string
+        description: Dynadot API key
+      dynadotSandbox:
+        type: string
+        description: Set to 'true' to use the sandbox API (default false)
+  commandFunction:
+    |-
+    config => ({ command: 'npx', args: ['-y', 'dynadot-mcp'], env: { DYNADOT_API_KEY: config.dynadotApiKey, DYNADOT_SANDBOX: config.dynadotSandbox || '' } })
