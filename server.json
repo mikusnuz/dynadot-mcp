@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.mikusnuz/dynadot",
+  "description": "MCP server for the Dynadot domain registrar API — 60 tools for domain search, registration, DNS, contacts, transfers, and marketplace",
+  "repository": {
+    "url": "https://github.com/mikusnuz/dynadot-mcp",
+    "source": "github"
+  },
+  "version": "1.3.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "dynadot-mcp",
+      "version": "1.3.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DYNADOT_API_KEY",
+          "description": "Dynadot API key",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        },
+        {
+          "name": "DYNADOT_SANDBOX",
+          "description": "Set to 'true' to use the sandbox API",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}
