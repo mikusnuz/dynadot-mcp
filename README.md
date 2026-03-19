@@ -7,6 +7,8 @@
 
 MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) domain registrar API. Manage domains, DNS records, contacts, transfers, and more — all from your AI assistant.
 
+[![dynadot-mcp MCP server](https://glama.ai/mcp/servers/mikusnuz/dynadot-mcp/badges/card.svg)](https://glama.ai/mcp/servers/mikusnuz/dynadot-mcp)
+
 ## When to Use
 
 Tell your AI assistant things like:
