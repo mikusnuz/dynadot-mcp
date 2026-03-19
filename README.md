@@ -7,6 +7,21 @@
 
 MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) domain registrar API. Manage domains, DNS records, contacts, transfers, and more — all from your AI assistant.
 
+## When to Use
+
+Tell your AI assistant things like:
+
+- **"Search for available domains"** — bulk-check up to 100 domain names at once with pricing
+- **"Register a new domain"** — register or bulk-register domains
+- **"Update DNS records for my domain"** — set A, AAAA, CNAME, MX, TXT, SRV records
+- **"Transfer a domain to Dynadot"** — initiate inbound transfers with auth codes
+- **"Set up email forwarding"** — configure email forwarding or MX records
+- **"Renew my domain"** — renew before expiration
+- **"Lock/unlock domain for transfer"** — manage transfer lock status
+- **"Check domain WHOIS info"** — view and manage WHOIS privacy settings
+
+> **AI Agent Integration**: See [`llms.txt`](llms.txt) for a machine-readable summary, or copy [`templates/CLAUDE.md`](templates/CLAUDE.md) / [`templates/AGENTS.md`](templates/AGENTS.md) into your project for automatic MCP discovery.
+
 ## Features
 
 - **60 tools** covering the full Dynadot API3 (~106 commands)
