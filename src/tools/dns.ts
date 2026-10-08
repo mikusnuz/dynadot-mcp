@@ -53,8 +53,8 @@ export function registerDnsTools(
   server.tool(
     "set_dns",
     "Set DNS records for a domain using Dynadot's DNS service. Supports " +
-      "main records and up to 10 subdomains. Use the records parameter " +
-      "to pass Dynadot API parameters like main_record_type, main_record, " +
+      "main records and up to 100 subdomain records. Use the records parameter " +
+      "to pass Dynadot API parameters like main_record_type0, main_record0, " +
       "subdomain0, sub_record_type0, sub_record0, etc.",
     {
       domain: z.string().describe("Domain name to set DNS for"),
@@ -64,8 +64,8 @@ export function registerDnsTools(
           "DNS record parameters as key-value pairs. Keys follow Dynadot API3 set_dns2 naming: " +
             "main_record_type0..19 (a/aaaa/cname/forward/txt/mx/stealth/email), " +
             "main_record0..19 (value), main_recordx0..19 (MX distance/forward type/stealth title/email alias), " +
-            "subdomain0..9 (name), sub_record_type0..9 (type), sub_record0..9 (value), " +
-            "sub_recordx0..9 (MX distance etc), ttl (optional, default 300), " +
+            "subdomain0..99 (name), sub_record_type0..99 (type), sub_record0..99 (value), " +
+            "sub_recordx0..99 (MX distance etc), ttl (optional, default 300), " +
             "add_dns_to_current_setting (optional, set to '1' to append instead of overwrite)"
         ),
     },
@@ -211,8 +211,9 @@ export function registerDnsTools(
 
   server.tool(
     "set_dnssec",
-    "Set or clear DNSSEC for a domain. To enable, provide flags, algorithm, " +
-      "and public_key. To disable, set clear to true.",
+    "Set or clear DNSSEC for a domain. Provide either a DS record " +
+      "(key_tag, digest_type, digest, algorithm) or a DNSKEY " +
+      "(flags, public_key, algorithm). To disable, set clear to true without key fields.",
     {
       domain: z.string().describe("Domain name to configure DNSSEC for"),
       clear: z
@@ -220,21 +221,34 @@ export function registerDnsTools(
         .optional()
         .describe("Set to true to remove DNSSEC from the domain"),
       flags: z
-        .string()
+        .enum(["256", "257"])
         .optional()
         .describe("DNSSEC flags (e.g., '257' for KSK)"),
       algorithm: z
-        .string()
+        .enum(["1", "2", "3", "4", "5", "6", "7", "8", "10", "12", "13", "14", "15", "16", "252", "253", "254"])
         .optional()
         .describe("DNSSEC algorithm number (e.g., '13' for ECDSAP256SHA256)"),
       public_key: z
         .string()
+        .min(1)
+        .regex(/^[A-Za-z0-9+/]+={0,2}$/, "Public key must be base64 encoded")
         .optional()
         .describe("DNSSEC public key"),
+      key_tag: z.string().regex(/^\d+$/).refine((value) => Number(value) <= 65535)
+        .optional().describe("DS key tag (0-65535)"),
+      digest_type: z.enum(["1", "2", "3", "4"]).optional()
+        .describe("DS digest type: 1=SHA-1, 2=SHA-256, 3=GOST, 4=SHA-384"),
+      digest: z.string().regex(/^[0-9a-fA-F]+$/).optional()
+        .describe("DS digest in hexadecimal"),
     },
-    async ({ domain, clear, flags, algorithm, public_key }) => {
+    async ({ domain, clear, flags, algorithm, public_key, key_tag, digest_type, digest }) => {
       try {
+        const hasDs = key_tag !== undefined || digest_type !== undefined || digest !== undefined;
+        const hasDnskey = flags !== undefined || public_key !== undefined;
         if (clear) {
+          if (hasDs || hasDnskey || algorithm !== undefined) {
+            throw new Error("Do not provide DNSSEC key fields when clear is true.");
+          }
           const result = await client.clearDnssec(domain);
           return {
             content: [
@@ -242,10 +256,25 @@ export function registerDnsTools(
             ],
           };
         }
-        const params: Record<string, string> = {};
-        if (flags) params.flags = flags;
-        if (algorithm) params.algorithm = algorithm;
-        if (public_key) params.public_key = public_key;
+        if (!algorithm || hasDs === hasDnskey) {
+          throw new Error("Provide algorithm and exactly one complete DS or DNSKEY record.");
+        }
+        const params: Record<string, string> = { algorithm };
+        if (hasDs) {
+          if (key_tag === undefined || digest_type === undefined || digest === undefined) {
+            throw new Error("A DS record requires key_tag, digest_type, digest, and algorithm.");
+          }
+          const digestLengths = { "1": 40, "2": 64, "3": 64, "4": 96 };
+          if (digest.length !== digestLengths[digest_type]) {
+            throw new Error(`Digest type ${digest_type} requires ${digestLengths[digest_type]} hexadecimal characters.`);
+          }
+          Object.assign(params, { key_tag, digest_type, digest });
+        } else {
+          if (!flags || !public_key) {
+            throw new Error("A DNSKEY record requires flags, public_key, and algorithm.");
+          }
+          Object.assign(params, { flags, public_key });
+        }
         const result = await client.setDnssec(domain, params);
         return {
           content: [

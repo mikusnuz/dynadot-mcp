@@ -49,7 +49,7 @@
 - get_nameservers — Get current nameservers
 - register_nameserver — Register a custom nameserver
 - get_dnssec — Get DNSSEC settings
-- set_dnssec — Set or clear DNSSEC
+- set_dnssec — Set DNSSEC with DS (key_tag/digest_type/digest/algorithm) or DNSKEY (flags/public_key/algorithm), or clear without key fields
 - add_nameserver — Add a new nameserver entry
 - set_nameserver_ip — Update a nameserver's IP address
 - delete_nameserver — Delete a nameserver

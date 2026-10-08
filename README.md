@@ -117,11 +117,17 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `get_nameservers` | Get current nameservers |
 | `register_nameserver` | Register a custom nameserver |
 | `get_dnssec` | Get DNSSEC settings |
-| `set_dnssec` | Set or clear DNSSEC |
+| `set_dnssec` | Set a DS record or DNSKEY, or clear DNSSEC |
 | `add_nameserver` | Add a new nameserver entry |
 | `set_nameserver_ip` | Update a nameserver's IP address |
 | `delete_nameserver` | Delete a nameserver (by host or domain) |
 | `list_registered_nameservers` | List all registered nameservers |
+
+`set_dnssec` accepts either `key_tag`, `digest_type`, `digest`, and `algorithm`
+(DS records from a DNS provider), or `flags`, `public_key`, and `algorithm`
+(DNSKEY). These are string values. Incomplete or mixed records are rejected
+before contacting Dynadot. To disable DNSSEC, pass only `domain` and `clear: true`.
+`set_dns` supports up to 20 main records and 100 subdomain records (indexes 0–99).
 
 ### Contacts
 | Tool | Description |

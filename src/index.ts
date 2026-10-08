@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   const server = new McpServer(
     {
       name: "dynadot-mcp",
-      version: "1.3.0",
+      version: "1.4.0",
     },
     {
       capabilities: {
@@ -184,7 +184,7 @@ export function createSandboxServer() {
   const sandbox = new McpServer(
     {
       name: "dynadot-mcp",
-      version: "1.3.0",
+      version: "1.4.0",
     },
     {
       capabilities: {

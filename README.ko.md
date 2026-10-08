@@ -117,11 +117,17 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `get_nameservers` | 현재 네임서버 조회 |
 | `register_nameserver` | 커스텀 네임서버 등록 |
 | `get_dnssec` | DNSSEC 설정 조회 |
-| `set_dnssec` | DNSSEC 설정 또는 해제 |
+| `set_dnssec` | DS 레코드 또는 DNSKEY 설정, DNSSEC 해제 |
 | `add_nameserver` | 새 네임서버 항목 추가 |
 | `set_nameserver_ip` | 네임서버의 IP 주소 업데이트 |
 | `delete_nameserver` | 네임서버 삭제 (호스트 또는 도메인별) |
 | `list_registered_nameservers` | 등록된 모든 네임서버 목록 조회 |
+
+`set_dnssec`에는 DNS 제공업체의 DS 값인 `key_tag`, `digest_type`, `digest`,
+`algorithm` 또는 DNSKEY 값인 `flags`, `public_key`, `algorithm`을 문자열로
+전달합니다. 필수 값이 빠졌거나 두 방식을 섞으면 Dynadot 호출 전에 거부합니다.
+해제할 때는 `domain`과 `clear: true`만 전달하세요. `set_dns`는 최대 20개 메인
+레코드와 100개 서브도메인 레코드(인덱스 0–99)를 지원합니다.
 
 ### 연락처
 | 도구 | 설명 |
