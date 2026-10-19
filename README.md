@@ -7,6 +7,20 @@
 
 MCP (Model Context Protocol) server for the [Dynadot](https://www.dynadot.com) domain registrar API. Manage domains, DNS records, contacts, transfers, and more — all from your AI assistant.
 
+## API compatibility
+
+This release uses API3. Dynadot marks [API3 as scheduled for retirement](https://www.dynadot.com/domain/api-commands), without a shutdown date in that notice. Its replacement, [REST v2](https://www.dynadot.com/domain/api-document), is currently Beta; Dynadot warns that compatibility is not guaranteed and recommends avoiding critical production workflows during Beta.
+
+REST v2 is **not implemented** here and there is no automatic fallback. Migration requires separate API-key/secret signing, per-command request/response mappings, handling accepted-but-pending operations, and replacing API3 bulk operations with single-object calls. Those paths need sandbox verification before they can safely replace this client's domain and payment operations. API3 credentials and sandbox mode continue to work only while Dynadot supports that API.
+
+### DNS and nameservers
+
+- `set_dns` uses `set_dns2`: main indexes `0..19`, subdomain indexes `0..99`, and the documented auxiliary `recordx` fields. Unknown fields and incomplete record groups are rejected before a request.
+- DNS is replaced by default. Pass `add_dns_to_current_setting: "1"` to append; an empty `records` object clears records. Read existing DNS before preparing a replacement.
+- `set_nameserver_ip` accepts `server_id` and `ips` (mapped to `ip0..ip9`). The former `host`/`ip` inputs still work: the exact hostname is resolved to one registered server ID; missing or ambiguous matches fail without an update.
+- `delete_nameserver` accepts `server_id` (including comma-separated IDs) or `server_domain` (one exact nameserver hostname). `host` and `domain` remain aliases for that exact hostname, **not** a request to delete all nameservers under a parent domain.
+- Free-form options cannot override the configured API key, command, or an explicitly selected domain/contact/folder.
+
 ## When to Use
 
 Tell your AI assistant things like:
@@ -120,7 +134,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 | `set_dnssec` | Set a DS record or DNSKEY, or clear DNSSEC |
 | `add_nameserver` | Add a new nameserver entry |
 | `set_nameserver_ip` | Update a nameserver's IP address |
-| `delete_nameserver` | Delete a nameserver (by host or domain) |
+| `delete_nameserver` | Delete nameserver IDs or one exact nameserver hostname |
 | `list_registered_nameservers` | List all registered nameservers |
 
 `set_dnssec` accepts either `key_tag`, `digest_type`, `digest`, and `algorithm`

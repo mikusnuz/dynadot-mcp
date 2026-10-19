@@ -14,6 +14,7 @@
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { DynadotClient } from "../services/dynadot-client.js";
+import { dnsRecordsSchema } from "../services/dns-records.js";
 
 export function registerDnsTools(
   server: McpServer,
@@ -55,17 +56,17 @@ export function registerDnsTools(
     "Set DNS records for a domain using Dynadot's DNS service. Supports " +
       "main records and up to 100 subdomain records. Use the records parameter " +
       "to pass Dynadot API parameters like main_record_type0, main_record0, " +
-      "subdomain0, sub_record_type0, sub_record0, etc.",
+      "subdomain0, sub_record_type0, sub_record0, etc. Existing DNS is replaced " +
+      "unless add_dns_to_current_setting is '1'; an empty records object clears records.",
     {
       domain: z.string().describe("Domain name to set DNS for"),
-      records: z
-        .record(z.string())
+      records: dnsRecordsSchema
         .describe(
           "DNS record parameters as key-value pairs. Keys follow Dynadot API3 set_dns2 naming: " +
             "main_record_type0..19 (a/aaaa/cname/forward/txt/mx/stealth/email), " +
             "main_record0..19 (value), main_recordx0..19 (MX distance/forward type/stealth title/email alias), " +
             "subdomain0..99 (name), sub_record_type0..99 (type), sub_record0..99 (value), " +
-            "sub_recordx0..99 (MX distance etc), ttl (optional, default 300), " +
+            "sub_recordx0..99 (MX distance etc), ttl (optional), " +
             "add_dns_to_current_setting (optional, set to '1' to append instead of overwrite)"
         ),
     },
@@ -326,14 +327,21 @@ export function registerDnsTools(
 
   server.tool(
     "set_nameserver_ip",
-    "Update the IP address of an existing registered nameserver.",
+    "Update IP addresses of a registered nameserver by server_id. The legacy host alias " +
+      "resolves an exact hostname using list_registered_nameservers before updating.",
     {
-      host: z.string().describe("Nameserver hostname to update"),
-      ip: z.string().describe("New IP address"),
+      server_id: z.string().regex(/^\d+$/).optional().describe("ID from list_registered_nameservers"),
+      host: z.string().min(1).optional().describe("Legacy hostname alias; use instead of server_id"),
+      ips: z.array(z.string().ip()).min(1).max(10).optional().describe("Replacement addresses, encoded as ip0..ip9"),
+      ip: z.string().ip().optional().describe("Legacy single-address alias; use instead of ips"),
     },
-    async ({ host, ip }) => {
+    async ({ server_id, host, ips, ip }) => {
       try {
-        const result = await client.setNameserverIp(host, ip);
+        if ((server_id !== undefined) === (host !== undefined) || (ips !== undefined) === (ip !== undefined)) {
+          throw new Error("Provide exactly one of server_id/host and exactly one of ips/ip.");
+        }
+        const id = server_id ?? await client.resolveNameserverId(host!);
+        const result = await client.setNameserverIp(id, ips ?? [ip!]);
         return {
           content: [
             { type: "text" as const, text: JSON.stringify(result, null, 2) },
@@ -355,33 +363,30 @@ export function registerDnsTools(
 
   server.tool(
     "delete_nameserver",
-    "Delete a registered nameserver by hostname, or delete all nameservers " +
-      "associated with a domain.",
+    "Delete registered nameservers by server_id (comma-separated IDs), or one exact " +
+      "nameserver hostname. This does not delete all nameservers beneath a domain.",
     {
+      server_id: z.string().regex(/^\d+(,\d+)*$/).optional().describe("Nameserver ID or comma-separated IDs"),
+      server_domain: z.string().min(1).optional().describe("Exact nameserver hostname, e.g. ns1.example.com"),
       host: z
         .string()
+        .min(1)
         .optional()
-        .describe("Nameserver hostname to delete"),
+        .describe("Legacy alias for server_domain"),
       domain: z
         .string()
+        .min(1)
         .optional()
-        .describe("Delete all nameservers for this domain instead"),
+        .describe("Legacy alias for server_domain: an exact nameserver hostname, not a parent domain"),
     },
-    async ({ host, domain }) => {
+    async ({ server_id, server_domain, host, domain }) => {
       try {
-        let result;
-        if (domain) {
-          result = await client.deleteNameserverByDomain(domain);
-        } else if (host) {
-          result = await client.deleteNameserver(host);
-        } else {
-          return {
-            content: [
-              { type: "text" as const, text: "Either host or domain is required" },
-            ],
-            isError: true,
-          };
+        if ([server_id, server_domain, host, domain].filter((value) => value !== undefined).length !== 1) {
+          throw new Error("Provide exactly one of server_id, server_domain, host or domain.");
         }
+        const result = server_id !== undefined
+          ? await client.deleteNameserver(server_id)
+          : await client.deleteNameserverByDomain((server_domain ?? host ?? domain)!);
         return {
           content: [
             { type: "text" as const, text: JSON.stringify(result, null, 2) },

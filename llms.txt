@@ -10,6 +10,8 @@
 
 ## Environment Variables
 
+API compatibility: this client uses legacy API3, which Dynadot has marked for retirement without a date in the notice. REST v2 is Beta and is not implemented or selected automatically. See https://www.dynadot.com/domain/api-commands and https://www.dynadot.com/domain/api-document.
+
 - `DYNADOT_API_KEY` (required) — Dynadot API key from https://www.dynadot.com/account/domain/setting/api.html
 - `DYNADOT_SANDBOX` (optional) — Set `true` for sandbox mode (default: `false`)
 
@@ -44,15 +46,15 @@
 
 ### DNS (10)
 - get_dns — Get DNS records for a domain
-- set_dns — Set DNS records (A, AAAA, CNAME, MX, TXT, etc.)
+- set_dns — Replace DNS records using set_dns2 (main0..19, sub0..99); add_dns_to_current_setting="1" appends, empty records clears. Unknown fields/incomplete record groups are rejected.
 - set_nameservers — Configure nameservers (up to 13)
 - get_nameservers — Get current nameservers
 - register_nameserver — Register a custom nameserver
 - get_dnssec — Get DNSSEC settings
 - set_dnssec — Set DNSSEC with DS (key_tag/digest_type/digest/algorithm) or DNSKEY (flags/public_key/algorithm), or clear without key fields
 - add_nameserver — Add a new nameserver entry
-- set_nameserver_ip — Update a nameserver's IP address
-- delete_nameserver — Delete a nameserver
+- set_nameserver_ip — Update server_id with ips (ip0..ip9); legacy host is resolved to one exact ID, ip is a single-address alias
+- delete_nameserver — Delete server_id(s) or one exact server_domain hostname; host/domain are hostname aliases, never parent-domain bulk deletion
 - list_registered_nameservers — List all registered nameservers
 
 ### Contacts (7)

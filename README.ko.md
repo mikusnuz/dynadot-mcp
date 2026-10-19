@@ -7,6 +7,20 @@
 
 [Dynadot](https://www.dynadot.com) 도메인 등록대행업체 API를 위한 MCP (Model Context Protocol) 서버입니다. AI 어시스턴트에서 도메인, DNS 레코드, 연락처, 이전 등을 관리할 수 있습니다.
 
+## API 호환성
+
+이 버전은 API3를 사용합니다. Dynadot은 [API3 종료 예정](https://www.dynadot.com/domain/api-commands)을 안내하고 있지만 해당 안내에 종료 날짜는 명시하지 않았습니다. 후속 [REST v2](https://www.dynadot.com/domain/api-document)는 현재 Beta이며, Dynadot은 호환성을 보장하지 않고 중요한 운영 작업에 사용하는 것을 권장하지 않습니다.
+
+이 MCP에는 REST v2가 **아직 구현되어 있지 않으며** 자동 전환도 하지 않습니다. 전환하려면 API 키/시크릿 서명, 명령별 요청·응답 매핑, 접수 후 처리 중인 작업의 상태 처리, API3 일괄 작업을 단일 작업으로 나누는 처리가 필요합니다. 도메인·결제 작업에 적용하기 전 샌드박스 검증도 필요합니다. 기존 API3 인증과 샌드박스 모드는 Dynadot이 API3를 지원하는 동안만 사용할 수 있습니다.
+
+### DNS와 네임서버
+
+- `set_dns`는 `set_dns2`의 메인 인덱스 `0..19`, 서브도메인 인덱스 `0..99`, 보조 `recordx` 필드를 사용합니다. 알 수 없는 필드나 불완전한 레코드는 요청 전에 거부합니다.
+- 기본 동작은 기존 DNS 교체입니다. 추가하려면 `add_dns_to_current_setting: "1"`을 지정하세요. 빈 `records` 객체는 레코드를 지웁니다. 교체할 때는 먼저 기존 DNS를 조회하세요.
+- `set_nameserver_ip`는 `server_id`와 `ips`를 받아 `ip0..ip9`로 전달합니다. 기존 `host`/`ip`도 지원하며, 정확히 일치하는 호스트의 등록 ID 하나를 조회합니다. 없거나 중복되면 변경하지 않습니다.
+- `delete_nameserver`는 `server_id`(쉼표로 구분한 여러 ID도 가능) 또는 `server_domain`(정확한 네임서버 호스트 하나)을 받습니다. 기존 `host`와 `domain`도 정확한 호스트의 별칭이며, 상위 도메인의 네임서버 전체 삭제를 의미하지 않습니다.
+- 자유 형식 옵션으로 API 키, 명령 또는 명시적으로 선택한 도메인·연락처·폴더를 덮어쓸 수 없습니다.
+
 ## 이런 경우에 사용하세요
 
 AI 어시스턴트에 이렇게 말해보세요:
@@ -120,7 +134,7 @@ Claude Desktop 설정 파일(`~/Library/Application Support/Claude/claude_deskto
 | `set_dnssec` | DS 레코드 또는 DNSKEY 설정, DNSSEC 해제 |
 | `add_nameserver` | 새 네임서버 항목 추가 |
 | `set_nameserver_ip` | 네임서버의 IP 주소 업데이트 |
-| `delete_nameserver` | 네임서버 삭제 (호스트 또는 도메인별) |
+| `delete_nameserver` | 네임서버 ID 또는 정확한 네임서버 호스트 삭제 |
 | `list_registered_nameservers` | 등록된 모든 네임서버 목록 조회 |
 
 `set_dnssec`에는 DNS 제공업체의 DS 값인 `key_tag`, `digest_type`, `digest`,

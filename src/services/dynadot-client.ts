@@ -4,11 +4,23 @@
  * Wraps all Dynadot API3 commands via GET requests with JSON responses.
  */
 
+import { isIP } from "node:net";
+import { dnsRecordsSchema } from "./dns-records.js";
+
 const PROD_URL = "https://api.dynadot.com/api3.json";
 const SANDBOX_URL = "https://api-sandbox.dynadot.com/api3.json";
 
 export interface DynadotResponse {
   [key: string]: unknown;
+}
+
+/** Keep the operation's explicit target separate from free-form API options. */
+export function withFixedParams(fixed: Record<string, string>, options: Record<string, string> = {}) {
+  const reserved = new Set(["key", "command", ...Object.keys(fixed)].map((key) => key.toLowerCase()));
+  for (const key of Object.keys(options)) {
+    if (reserved.has(key.toLowerCase())) throw new Error(`Reserved API parameter cannot be overridden: ${key}`);
+  }
+  return { ...options, ...fixed };
 }
 
 export class DynadotClient {
@@ -27,6 +39,7 @@ export class DynadotClient {
    * All parameters are passed as query string params.
    */
   async call(command: string, params?: Record<string, string>): Promise<DynadotResponse> {
+    withFixedParams({}, params);
     if (!this.apiKey) {
       throw new Error(
         "DYNADOT_API_KEY environment variable is required. " +
@@ -40,7 +53,7 @@ export class DynadotClient {
 
     if (params) {
       for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== "") {
+        if (value !== undefined) {
           url.searchParams.set(key, value);
         }
       }
@@ -49,15 +62,26 @@ export class DynadotClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    let response: Response;
+    let json: DynadotResponse;
     try {
-      response = await fetch(url.toString(), {
+      const response = await fetch(url.toString(), {
         method: "GET",
         signal: controller.signal,
       });
+      if (!response.ok) {
+        throw new Error(`Dynadot API HTTP error: ${response.status} ${response.statusText}`);
+      }
+      try {
+        json = await response.json() as DynadotResponse;
+      } catch (error) {
+        if (controller.signal.aborted) throw error;
+        throw new Error(`Dynadot API returned invalid JSON for command: ${command}`);
+      }
+      if (json === null || typeof json !== "object" || Array.isArray(json)) {
+        throw new Error(`Dynadot API returned an invalid response for command: ${command}`);
+      }
     } catch (error) {
-      clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === "AbortError") {
+      if (controller.signal.aborted) {
         throw new Error(
           `Dynadot API request timed out after ${this.timeoutMs}ms: ${command}`
         );
@@ -65,21 +89,6 @@ export class DynadotClient {
       throw error;
     } finally {
       clearTimeout(timeoutId);
-    }
-
-    if (!response.ok) {
-      throw new Error(
-        `Dynadot API HTTP error: ${response.status} ${response.statusText}`
-      );
-    }
-
-    let json: DynadotResponse;
-    try {
-      json = await response.json() as DynadotResponse;
-    } catch {
-      throw new Error(
-        `Dynadot API returned invalid JSON for command: ${command}`
-      );
     }
 
     // Check for error in response — Dynadot uses various response wrappers
@@ -200,7 +209,7 @@ export class DynadotClient {
   }
 
   async setDns(domain: string, records: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("set_dns2", { domain, ...records });
+    return this.call("set_dns2", withFixedParams({ domain }, dnsRecordsSchema.parse(records)));
   }
 
   async setNameservers(domain: string, nameservers: string[]): Promise<DynadotResponse> {
@@ -224,7 +233,7 @@ export class DynadotClient {
   }
 
   async setDnssec(domain: string, params: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("set_dnssec", { domain_name: domain, ...params });
+    return this.call("set_dnssec", withFixedParams({ domain_name: domain }, params));
   }
 
   async clearDnssec(domain: string): Promise<DynadotResponse> {
@@ -235,16 +244,36 @@ export class DynadotClient {
     return this.call("add_ns", { host, ip });
   }
 
-  async setNameserverIp(host: string, ip: string): Promise<DynadotResponse> {
-    return this.call("set_ns_ip", { host, ip });
+  async setNameserverIp(serverId: string, ips: string[]): Promise<DynadotResponse> {
+    if (!/^\d+$/.test(serverId)) throw new Error("A numeric nameserver ID is required.");
+    if (ips.length < 1 || ips.length > 10 || ips.some((ip) => !isIP(ip))) {
+      throw new Error("Provide 1..10 valid IP addresses for ip0..ip9.");
+    }
+    const params: Record<string, string> = { server_id: serverId };
+    ips.forEach((ip, index) => { params[`ip${index}`] = ip; });
+    return this.call("set_ns_ip", params);
   }
 
-  async deleteNameserver(host: string): Promise<DynadotResponse> {
-    return this.call("delete_ns", { host });
+  async resolveNameserverId(host: string): Promise<string> {
+    const result = await this.listRegisteredNameservers();
+    const response = result.ServerListResponse as { ServerList?: { ServerName?: string; ServerId?: string | number }[] } | undefined;
+    const normalize = (name: string) => name.replace(/\.$/, "").toLowerCase();
+    const matches = Array.isArray(response?.ServerList)
+      ? response.ServerList.filter((server) => typeof server.ServerName === "string" && normalize(server.ServerName) === normalize(host))
+      : [];
+    if (matches.length !== 1 || !/^\d+$/.test(String(matches[0].ServerId))) {
+      throw new Error("Could not resolve one nameserver ID for host. Use list_registered_nameservers and pass server_id explicitly.");
+    }
+    return String(matches[0].ServerId);
+  }
+
+  async deleteNameserver(serverId: string): Promise<DynadotResponse> {
+    if (!/^\d+(,\d+)*$/.test(serverId)) throw new Error("Provide a nameserver ID or comma-separated IDs.");
+    return this.call("delete_ns", { server_id: serverId });
   }
 
   async deleteNameserverByDomain(domain: string): Promise<DynadotResponse> {
-    return this.call("delete_ns_by_domain", { domain });
+    return this.call("delete_ns_by_domain", { server_domain: domain });
   }
 
   async listRegisteredNameservers(): Promise<DynadotResponse> {
@@ -258,7 +287,7 @@ export class DynadotClient {
   }
 
   async editContact(contactId: string, fields: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("edit_contact", { contact_id: contactId, ...fields });
+    return this.call("edit_contact", withFixedParams({ contact_id: contactId }, fields));
   }
 
   async deleteContact(contactId: string): Promise<DynadotResponse> {
@@ -274,11 +303,11 @@ export class DynadotClient {
   }
 
   async setContactRegionalSetting(command: string, contactId: string, params: Record<string, string>): Promise<DynadotResponse> {
-    return this.call(command, { contact_id: contactId, ...params });
+    return this.call(command, withFixedParams({ contact_id: contactId }, params));
   }
 
   async createCnAudit(contactId: string, params: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("create_cn_audit", { contact_id: contactId, ...params });
+    return this.call("create_cn_audit", withFixedParams({ contact_id: contactId }, params));
   }
 
   async getCnAuditStatus(contactId: string): Promise<DynadotResponse> {
@@ -338,7 +367,7 @@ export class DynadotClient {
   }
 
   async setWhoisContacts(domain: string, contacts: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("set_whois", { domain, ...contacts });
+    return this.call("set_whois", withFixedParams({ domain }, contacts));
   }
 
   async setForwarding(domain: string, url: string, isTemp?: boolean): Promise<DynadotResponse> {
@@ -384,7 +413,7 @@ export class DynadotClient {
   }
 
   async setEmailForward(domain: string, emailParams: Record<string, string>): Promise<DynadotResponse> {
-    return this.call("set_email_forward", { domain, ...emailParams });
+    return this.call("set_email_forward", withFixedParams({ domain }, emailParams));
   }
 
   async clearDomainSetting(domain: string, service: string): Promise<DynadotResponse> {
