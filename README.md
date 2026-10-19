@@ -52,6 +52,8 @@ Tell your AI assistant things like:
 
 ## Installation
 
+Requires Node.js 20 or newer, matching the MCP SDK's installed runtime dependencies.
+
 ```bash
 npm install -g dynadot-mcp
 ```

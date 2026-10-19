@@ -1,6 +1,6 @@
 {
   "name": "dynadot-mcp",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "mcpName": "io.github.mikusnuz/dynadot",
   "description": "MCP server for the Dynadot domain registrar API — manage domains, DNS, contacts, transfers, and more",
   "main": "dist/index.js",
@@ -36,7 +36,7 @@
     "url": "https://github.com/mikusnuz/dynadot-mcp/issues"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "dist/**/*",
