@@ -31,7 +31,7 @@ API compatibility: this client uses legacy API3, which Dynadot has marked for re
 }
 ```
 
-## Tools (60)
+## Tools (67)
 
 ### Domain Management (9)
 - search_domain — Check domain availability (up to 100 at once, with pricing)

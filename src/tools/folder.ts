@@ -10,7 +10,7 @@
 
 import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { DynadotClient } from "../services/dynadot-client.js";
+import { DynadotClient, withFixedParams } from "../services/dynadot-client.js";
 
 export function registerFolderTools(
   server: McpServer,
@@ -126,10 +126,7 @@ export function registerFolderTools(
           setting_type === "clear"
             ? "set_clear_folder_setting"
             : `set_folder_${setting_type}`;
-        const result = await client.call(command, {
-          folder_id,
-          ...(params || {}),
-        });
+        const result = await client.call(command, withFixedParams({ folder_id }, params));
         return {
           content: [
             { type: "text" as const, text: JSON.stringify(result, null, 2) },

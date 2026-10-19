@@ -38,7 +38,7 @@ Tell your AI assistant things like:
 
 ## Features
 
-- **60 tools** covering the full Dynadot API3 (~106 commands)
+- **67 tools** covering Dynadot API3 domain management commands
 - Domain search, registration, renewal, deletion
 - DNS record management (A, AAAA, CNAME, MX, TXT, SRV)
 - Nameserver configuration and DNSSEC
